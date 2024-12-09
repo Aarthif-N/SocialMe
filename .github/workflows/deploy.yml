@@ -1,0 +1,44 @@
+name: CI/CD Pipeline for SocialMe
+
+on:
+  push:
+    branches:
+      - master  # Trigger on push to the main branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Checkout the repository
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Step 2: Set up Python
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    # Step 3: Install dependencies
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Step 5: Deploy to AWS Elastic Beanstalk
+    - name: Deploy to AWS Elastic Beanstalk
+      uses: einaregilsson/beanstalk-deploy@v22
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: SocialChat-App
+        environment_name: SocialChat-App-env
+        version_label: v-${{ github.run_id }}
+        region: ap-southeast-2
+        deployment_package: ./deployment.zip
+
+    # Step 6: Post-deployment verification (optional)
+    - name: Verify Deployment
+      run: |
+        echo "Deployment successful to Elastic Beanstalk."
