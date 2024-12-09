@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with AI Assistant</title>
+    <style>
+        body {
+            font-family: "Times New Roman", Times, serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://plus.unsplash.com/premium_photo-1676057060928-c717a8e96784?q=80&w=2816&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: #333;
+        }
+        .chat-container {
+            width: 50%;
+            margin: 50px auto;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .chat-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        .chat-box {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            height: 400px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        .chat-message {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: #d3d3d3;
+            color: black;
+            max-width: 70%;
+            display: inline-block;
+            position: relative;
+        }
+        .user {
+            align-self: flex-end;
+            background-color: #cce5ff;
+            text-align: right;
+        }
+        .assistant {
+            align-self: flex-start;
+            background-color: #d4edda;
+            text-align: left;
+        }
+        .chat-label {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .chat-input {
+            display: flex;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .chat-input button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .chat-input button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-title">SocialMe : Social Media Chat Assistant</div>
+        <div class="chat-box" id="chat-box">
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-message" placeholder="Type your message..." onkeydown="handleKeyPress(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <script>
+        const userId = 'Aarthif';
+
+        async function sendMessage() {
+            const userMessage = document.getElementById('user-message').value;
+            if (!userMessage) return;
+
+            const chatBox = document.getElementById('chat-box');
+
+            const userDiv = document.createElement('div');
+            userDiv.className = 'chat-message user';
+            userDiv.innerHTML = `<span class='chat-label'>${userId}:</span>${userMessage}`;
+            chatBox.appendChild(userDiv);
+
+            document.getElementById('user-message').value = '';
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId, user_message: userMessage }),
+            });
+
+            const data = await response.json();
+            const botMessage = formatMessage(data.bot_response);
+
+            const botDiv = document.createElement('div');
+            botDiv.className = 'chat-message assistant';
+            botDiv.innerHTML = `<span class='chat-label'>SocialMe:</span>${botMessage}`;
+            chatBox.appendChild(botDiv);
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function formatMessage(message) {
+            const lines = message.split('\n');
+            const formattedLines = lines.map(line => {
+                if (line.trim().startsWith('-')) {
+                    return `<li>${line.trim().substring(1).trim()}</li>`;
+                } else if (/^[0-9]+\./.test(line.trim())) {
+                    return `<li>${line.trim().substring(line.indexOf('.') + 1).trim()}</li>`;
+                }
+                return line;
+            });
+
+            if (formattedLines.some(line => line.startsWith('<li>'))) {
+                const isOrdered = lines[0].trim().startsWith('1.');
+                const listTag = isOrdered ? 'ol' : 'ul';
+                return `<${listTag}>${formattedLines.join('')}</${listTag}>`;
+            }
+
+            return message;
+        }
+    </script>
+</body>
+</html>
