@@ -7,6 +7,7 @@ load_dotenv()
 
 
 def chat_initialization():
+    #Chat Initialization
     OPENAI_API_KEY = os.getenv('OPENAI_KEY')
     if not OPENAI_API_KEY:
         raise ValueError("OpenAI API key is not set in the environment variables.")
