@@ -4,3 +4,4 @@ openai
 uvicorn
 debugpy
 python-dotenv
+jinja2
