@@ -11,6 +11,7 @@ templates = Jinja2Templates(directory="templates")
 router = APIRouter()
 chat_history: Dict[str, List[Dict[str, str]]] = {}
 
+#app
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
     try:
